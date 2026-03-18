@@ -1,0 +1,246 @@
+\documentclass[a4paper]{article}
+\usepackage{vntex}
+\usepackage[a4paper, margin=2.5cm]{geometry} 
+\usepackage{amssymb,latexsym,multicol,array,hhline,fancyhdr}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{lastpage}
+\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage{enumerate}
+\usepackage{color}
+\usepackage{graphicx}							
+\usepackage{array}
+\usepackage{tabularx, caption}
+\usepackage{multirow}
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage{multicol}
+\usepackage{rotating}
+
+\usepackage{setspace}
+\usepackage{tikz}
+\usepackage{listings}
+\usetikzlibrary{arrows,decorations.pathmorphing,backgrounds} 
+\usepackage{hyperref}
+\hypersetup{urlcolor=black,linkcolor=black,citecolor=black,colorlinks=true} 
+
+\newtheorem{theorem}{{\bf Định lý}}
+\newtheorem{property}{{\bf Tính chất}}
+\newtheorem{proposition}{{\bf Mệnh đề}}
+\newtheorem{corollary}[proposition]{{\bf Hệ quả}}
+\newtheorem{lemma}[proposition]{{\bf Bổ đề}}
+
+
+\setlength{\headheight}{40pt}
+\pagestyle{fancy}
+\fancyhead{} 
+\fancyhead[L]{
+ \begin{tabular}{rl}
+  \begin{picture}(25,15)(0,0)
+  \put(0,-8){\includegraphics[width=8mm, height=8mm]{logoITSGUsmall}}
+  \end{picture}&
+	\begin{tabular}{l}
+		\textbf{\bf \ttfamily Trường Đại học Sài Gòn}\\
+		\textbf{\bf \ttfamily Khoa Công Nghệ Thông Tin}
+	\end{tabular} 	
+ \end{tabular}
+}
+\fancyhead[R]{
+	\begin{tabular}{l}
+		\tiny \bf \\
+		\tiny \bf 
+	\end{tabular}  }
+\fancyfoot{} % clear all footer fields
+\fancyfoot[L]{\scriptsize \ttfamily Bài tập lớn môn phát triển phần mềm mã nguồn mở - Niên khóa 2026-2027}
+\fancyfoot[R]{\scriptsize \ttfamily Trang {\thepage}/\pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+
+%%%
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{3}
+\makeatletter
+\newcounter {subsubsubsection}[subsubsection]
+\renewcommand\thesubsubsubsection{\thesubsubsection .\@alph\c@subsubsubsection}
+\newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
+                                { -3.25ex\@plus -1ex \@minus -.2ex}%
+                                {1.5ex \@plus .2ex}%
+                                {\normalfont\normalsize\bfseries}}
+\newcommand*\l@subsubsubsection{\@dottedtocline{3}{10.0em}{4.1em}}
+\newcommand*{\subsubsubsectionmark}[1]{}
+\makeatother
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+
+\lstset{frame=tb,
+	language=Matlab,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily\color{black}},
+	numbers=none,
+	numberstyle=\tiny\color{black},
+	keywordstyle=\color{black},   
+	commentstyle=\color{black}, 
+	stringstyle=\color{black},    
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3,
+	numbers=left,
+	stepnumber=1,
+	numbersep=1pt, 
+	firstnumber=1,
+	numberfirstline=true
+}
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+TRƯỜNG ĐẠI HỌC SÀI GÒN \\
+KHOA CÔNG NGHỆ THÔNG TIN
+
+\vspace{1cm}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=3cm]{logoITSGU}
+\end{center}
+\end{figure}
+
+\vspace{1cm}
+
+
+\begin{center}
+\begin{tabular}{c}
+	\multicolumn{1}{l}{\textbf{{\Large PHÁT TRIỂN PHẦN MỀM MÃ NGUỒN MỞ}}}\\
+	~~\\
+	\hline
+	\\
+	\multicolumn{1}{l}{\textbf{{\Large BÁO CÁO ĐỒ ÁN }}}\\
+	\\
+	
+	\textbf{{\Huge SmartDoc AI - Intelligent Document QA System}}\\
+	\\
+	\hline
+\end{tabular}
+\end{center}
+
+\vspace{3cm}
+
+\begin{table}[h]
+\begin{tabular}{rrl}
+\hspace{5 cm} & GVHD: &Từ Lãng Phiêu\\
+& Thành viên: & Nguyễn Tuấn Vũ - 3122410483\\
+& & Quách Hữu Vinh - 3122410477 \\
+& & Nguyễn Thanh Tú - 3121410549 \\
+& & Vũ Hoàng Chung - 3122560007 \\
+\end{tabular}
+\vspace{1.5 cm}
+\end{table}
+
+\begin{center}
+
+{\footnotesize TP. HỒ CHÍ MINH, THÁNG 03/2026}
+\end{center}
+\end{center}\end{titlepage}
+
+\newpage
+\thispagestyle{empty}
+\newpage
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Giới thiệu}
+\subsection{Bối cảnh và động lực}
+Với khối lượng thông tin ngày càng tăng trong các tài liệu số, việc tìm kiếm và trích xuất
+thông tin một cách hiệu quả đã trở thành thách thức lớn. Các phương pháp truyền thống
+như tìm kiếm từ khóa thường không đủ để hiểu ngữ cảnh và ý nghĩa sâu xa của câu hỏi.
+
+\subsection{Mục tiêu dự án}
+
+\subsection{Phạm vi dự án}
+
+\section{Cơ sở lý thuyết}
+\subsection{RAG (Retrieval-Augmented Generation)}
+\subsubsection{Khái niệm}
+\subsubsection{Kiến trúc RAG}
+
+\subsection{Embedding và Vector Database}
+\subsubsection{Text Embedding}
+\subsubsection{FAISS (Facebook AI Similarity Search)}
+
+\subsection{Large Language Models (LLMs)}
+\subsubsection{Qwen2.5}
+\subsubsection{Ollama}
+
+\subsection{LangChain Framework}
+
+\section{Thiết kế hệ thống}
+\subsection{Kiến trúc tổng quan}
+
+\subsection{Data Flow (Luồng dữ liệu)}
+\subsubsection{Document Processing Flow}
+\subsubsection{Query Processing Flow}
+
+\subsection{Chi tiết các thành phần}
+\subsubsection{Document Loader}
+\subsubsection{Text Splitter}
+\subsubsection{Embedding Model}
+\subsubsection{Vector Store}
+\subsubsection{LLM Integration}
+
+\subsection{Prompt Engineering}
+
+\section{Triển khai}
+\subsection{Công nghệ sử dụng}
+\subsubsection{Frontend}
+\subsubsection{Backend \& AI}
+\subsubsection{Document Processing}
+\subsubsection{Python Libraries}
+
+\subsection{Cài đặt môi trường}
+\subsubsection{Yêu cầu hệ thống}
+\subsubsection{Các bước cài đặt}
+
+\subsection{Cấu trúc thư mục}
+
+\subsection{Cấu hình chi tiết}
+\subsubsection{Embedding Configuration}
+\subsubsection{Retriever Configuration}
+\subsubsection{LLM Configuration}
+
+\section{Giao diện người dùng}
+\subsection{Thiết kế UI/UX}
+\subsubsection{Color Palette}
+\subsubsection{Layout Structure}
+
+\subsection{User Flow}
+
+\subsection{Features}
+\subsubsection{File Upload}
+\subsubsection{Question Answering}
+\subsubsection{Error Handling}
+
+\section{Kết quả và đánh giá}
+\subsection{Kết quả đạt được}
+\subsubsection{Chức năng hoàn thành}
+\subsubsection{Performance Metrics}
+
+\subsection{Testing}
+\subsubsection{Test Cases}
+
+\subsection{Ưu điểm}
+
+\subsection{Hạn chế}
+
+\subsection{So sánh với các giải pháp khác}
+
+\section{Kết luận}
+\subsection{Tổng kết}
+\end{document}

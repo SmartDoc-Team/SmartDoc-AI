@@ -1,0 +1,11 @@
+streamlit
+langchain
+langchain-community
+langchain-text-splitters
+faiss-cpu
+sentence-transformers
+pdfplumber
+pypdf
+numpy
+pandas
+torch --index-url https://download.pytorch.org/whl/cpu
