@@ -1,6 +1,14 @@
 from __future__ import annotations
+
+import sys
 from pathlib import Path
+
 import streamlit as st
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 from smartdoc.config import settings
 from smartdoc.document_loaders import load_document
 from smartdoc.ollama_client import OllamaClient
