@@ -3,7 +3,16 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from dotenv import load_dotenv
+from huggingface_hub import login
 
+
+load_dotenv()
+
+# Login HuggingFace (nếu có token)
+hf_token = os.getenv("HF_TOKEN")
+if hf_token:
+    login(token=hf_token)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

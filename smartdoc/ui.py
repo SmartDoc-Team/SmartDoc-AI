@@ -6,6 +6,40 @@ from smartdoc.document_loaders import load_document
 from smartdoc.ollama_client import OllamaClient
 from smartdoc.rag import RAGPipeline
 
+
+def _truncate_text(text: str, limit: int) -> str:
+    if len(text) <= limit:
+        return text
+    return text[: limit - 1].rstrip() + "…"
+
+
+def _normalize_messages() -> None:
+    for index, message in enumerate(st.session_state.messages):
+        if "id" not in message:
+            message["id"] = f"msg_{index}"
+
+
+def _create_message(role: str, content: str) -> dict[str, str]:
+    return {"id": f"msg_{len(st.session_state.messages)}", "role": role, "content": content}
+
+
+def _build_history_pairs() -> list[dict[str, str]]:
+    pairs: list[dict[str, str]] = []
+    messages = st.session_state.messages
+    for pair_index in range(0, len(messages), 2):
+        user_message = messages[pair_index]
+        assistant_message = messages[pair_index + 1] if pair_index + 1 < len(messages) else {"content": ""}
+        pairs.append(
+            {
+                "pair_index": pair_index // 2,
+                "user_index": pair_index,
+                "user_message": user_message,
+                "assistant_message": assistant_message,
+            }
+        )
+    return pairs
+
+
 @st.cache_resource(show_spinner=False)
 def get_pipeline() -> RAGPipeline:
     return RAGPipeline(settings)
@@ -13,11 +47,23 @@ def get_pipeline() -> RAGPipeline:
 def main() -> None:
     settings.ensure_directories()
     st.set_page_config(page_title=settings.app_name, page_icon="📄", layout="wide")
-    
 
     if "messages" not in st.session_state:
-        st.session_state.messages = [
-        ]
+        st.session_state.messages = []
+    _normalize_messages()
+
+    if "selected_message_index" not in st.session_state:
+        st.session_state.selected_message_index = None
+
+    query_params = st.query_params
+
+    selected_param = query_params.get("selected")
+
+    if selected_param is not None:
+        try:
+            st.session_state.selected_message_index = int(selected_param)
+        except ValueError:
+            pass
 
     st.title("SmartDoc AI")
     st.caption("RAG document Q&A for PDF and DOCX with FAISS, multilingual embeddings, and Ollama Qwen2.5.")
@@ -41,17 +87,67 @@ def main() -> None:
         st.write(f"Chunk size: `{settings.chunk_size}`")
         st.write(f"Top-k retrieval: `{settings.retrieval_k}`")
 
-        # Hiển thị lịch sử vắn tắt ở sidebar
+        # Sidebar history panel
         st.divider()
-        st.subheader(" History")
-        for i, msg in enumerate(st.session_state.messages):
-            if msg["role"] == "user":
-                st.caption(f"{i//2 + 1}. {msg['content'][:40]}...")
+        st.subheader("History")
+        st.markdown(
+            """
+            <style>
+            .history-panel {
+                max-height: 360px;
+                overflow-y: auto;
+                padding-right: 4px;
+            }
+            .history-item {
+                margin-bottom: 8px;
+                border: 1px solid #ddd;
+                border-radius: 12px;
+                background: #fff;
+            }
+            .history-item.selected {
+                border-color: #1f77b4;
+                background: #e8f4ff;
+            }
+            .history-link {
+                display: block;
+                padding: 10px 12px;
+                text-decoration: none;
+                color: inherit;
+            }
+            .history-question {
+                font-size: 0.95rem;
+                font-weight: 600;
+                margin-bottom: 4px;
+            }
+            .history-answer {
+                font-size: 0.9rem;
+                color: #4d4d4d;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        history_pairs = _build_history_pairs()
+        if history_pairs:
+            history_html = ["<div class='history-panel'>"]
+            for pair in history_pairs:
+                user_text = _truncate_text(pair["user_message"]["content"], 30)
+                assistant_text = _truncate_text(pair["assistant_message"]["content"], 50)
+                preview = f"Q: {user_text}\nA: {assistant_text}"
+                if st.button(preview, key=f"history_{pair['pair_index']}"):
+                    st.session_state.scroll_to = pair["user_index"]
+            history_html.append("</div>")
+            st.markdown("\n".join(history_html), unsafe_allow_html=True)
+        else:
+            st.info("No chat history yet.")
 
         # Các nút xóa (Q3)
         st.divider()
         if st.button("Clear History", type="primary", use_container_width=True):
             st.session_state.messages = []
+            st.session_state.selected_message_index = None
+            st.query_params.clear()
             st.rerun()
 
         if st.button("Clear Vector Store", use_container_width=True):
@@ -62,8 +158,9 @@ def main() -> None:
     # --- KHU VỰC CHÍNH ---
     uploaded_file = st.file_uploader("Upload a PDF or DOCX document", type=["pdf", "docx"])
     
-    # Render các bong bóng chat (Q2) bao gồm cả dữ liệu mẫu
+    # Render chat messages with anchor targets
     for message in st.session_state.messages:
+        st.markdown(f'<div id="{message["id"]}"></div>', unsafe_allow_html=True)
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
@@ -77,7 +174,7 @@ def main() -> None:
             return
             
         # Thêm câu hỏi vào lịch sử
-        st.session_state.messages.append({"role": "user", "content": question.strip()})
+        st.session_state.messages.append(_create_message("user", question.strip()))
         
         # Nếu có file thì mới xử lý RAG thật, nếu không chỉ test UI trả lời giả lập
         if uploaded_file:
@@ -87,16 +184,35 @@ def main() -> None:
                 document = load_document(target_path)
                 with st.spinner("Thinking..."):
                     pipeline = get_pipeline()
-                    result = pipeline.answer_question(document, question.strip())
-                    st.session_state.messages.append({"role": "assistant", "content": result.answer})
+                    result = pipeline.answer_question(
+                        document,
+                        question.strip(),
+                        st.session_state.messages,
+                    )
+                    st.session_state.messages.append(_create_message("assistant", result.answer))
             except Exception as exc:
                 st.exception(exc)
         else:
             # Phản hồi giả lập nếu không có file (để test UI nhanh)
-            st.session_state.messages.append({"role": "assistant", "content": "Bạn chưa upload tài liệu, nhưng tôi vẫn nhận được câu hỏi của bạn. Hãy upload file để tôi phân tích chính xác hơn nhé!"})
+            st.session_state.messages.append(_create_message(
+                "assistant",
+                "Bạn chưa upload tài liệu, nhưng tôi vẫn nhận được câu hỏi của bạn. Hãy upload file để tôi phân tích chính xác hơn nhé!",
+            ))
         
         st.rerun()
 
+    if "scroll_to" in st.session_state:
+        target = st.session_state.scroll_to
+
+        st.markdown(f"""
+        <script>
+        const el = document.getElementById("msg_{target}");
+        if (el) {{
+            el.scrollIntoView({{behavior: "smooth"}});
+        }}
+        </script>
+        """, unsafe_allow_html=True)
+    
     st.divider()
     st.markdown("Supported file types: `PDF`, `DOCX`")
 

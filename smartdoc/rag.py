@@ -23,6 +23,8 @@ class RetrievalResult:
 
 
 class RAGPipeline:
+    HISTORY_MESSAGE_LIMIT = 20
+
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.embedder = self._load_embedder()
@@ -52,12 +54,17 @@ class RAGPipeline:
                     "or pre-download the model to the local Hugging Face cache."
                 ) from offline_exc
 
-    def answer_question(self, document: LoadedDocument, question: str) -> RetrievalResult:
+    def answer_question(
+        self,
+        document: LoadedDocument,
+        question: str,
+        conversation_history: list[dict[str, str]] | None = None,
+    ) -> RetrievalResult:
         chunks = self._split_text(document.text)
         embeddings = self.embedder.encode(chunks, normalize_embeddings=True)
         index = self._build_index(embeddings)
         top_chunks = self._retrieve_chunks(index, embeddings, chunks, question)
-        prompt = self._build_prompt(document, top_chunks, question)
+        prompt = self._build_prompt(document, top_chunks, question, conversation_history)
         answer = self.ollama.generate(prompt)
         self._persist_index(document, embeddings, chunks)
         return RetrievalResult(answer=answer, contexts=top_chunks, chunk_count=len(chunks))
@@ -85,10 +92,31 @@ class RAGPipeline:
         _, indices = index.search(np.asarray(question_embedding, dtype=np.float32), self.settings.retrieval_k)
         return [chunks[idx] for idx in indices[0] if 0 <= idx < len(chunks)]
 
-    def _build_prompt(self, document: LoadedDocument, contexts: list[str], question: str) -> str:
+    def _format_history(self, conversation_history: list[dict[str, str]]) -> str:
+        history = [msg for msg in conversation_history if msg.get("content")]
+        if len(history) > self.HISTORY_MESSAGE_LIMIT:
+            history = history[-self.HISTORY_MESSAGE_LIMIT:]
+
+        lines: list[str] = []
+        for msg in history:
+            role = "User" if msg.get("role") == "user" else "Assistant"
+            lines.append(f"{role}: {msg.get('content')}")
+        return "\n".join(lines)
+
+    def _build_prompt(
+        self,
+        document: LoadedDocument,
+        contexts: list[str],
+        question: str,
+        conversation_history: list[dict[str, str]] | None = None,
+    ) -> str:
         joined_context = "\n\n---\n\n".join(contexts)
         clipped_context = joined_context[: self.settings.max_context_chars]
-        return (
+        history_block = ""
+        if conversation_history:
+            history_block = self._format_history(conversation_history)
+
+        prompt = (
             "You are SmartDoc AI, a helpful assistant for document question answering.\n"
             "Answer in Vietnamese unless the user asks otherwise.\n"
             "Use only the provided context. The chunks are already sorted by relevance, so prioritize earlier chunks first.\n"
@@ -96,9 +124,13 @@ class RAGPipeline:
             "If the answer is missing, say clearly that the document does not contain it.\n\n"
             f"Document: {document.source_name} ({document.source_type})\n\n"
             f"Context:\n{clipped_context}\n\n"
-            f"Question: {question}\n\n"
-            "Answer:"
         )
+
+        if history_block:
+            prompt += f"Conversation history:\n{history_block}\n\n"
+
+        prompt += f"Question: {question}\n\nAnswer:"
+        return prompt
 
     def _persist_index(self, document: LoadedDocument, embeddings: np.ndarray, chunks: list[str]) -> None:
         digest = hashlib.md5(document.source_name.encode("utf-8"), usedforsecurity=False).hexdigest()
