@@ -17,9 +17,10 @@ SUPPORTED_TYPES = {".pdf": "pdf", ".docx": "docx"}
 CONTROL_CHARS_RE = re.compile(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]")
 
 
-@dataclass(slots=True)
+@dataclass(slots=True)  
 class LoadedDocument:
-    text: str
+    text: str | None
+    pages: list[tuple[int, str]] | None
     source_name: str
     source_type: str
 
@@ -55,38 +56,41 @@ def load_document(file_path: str | Path) -> LoadedDocument:
 
     try:
         if source_type == "pdf":
-            text = extract_pdf_text(path)
+            pages = extract_pdf_pages(path)
+            text = None
         else:
             text = extract_docx_text(path)
+            pages = None
     except Exception as exc:  
         raise ValueError(f"Failed to parse '{path.name}' as {source_type.upper()}: {exc}") from exc
 
-    text = normalize_text(text)
+    text = normalize_text(text) if text else None
 
-    if not text.strip():
+    if not text and not pages:
         raise ValueError("The uploaded file did not produce readable text.")
 
     return LoadedDocument(
         text=text,
+        pages=pages,
         source_name=path.name,
         source_type=source_type,
     )
 
 
-def extract_pdf_text(path: Path) -> str:
+def extract_pdf_pages(path: Path) -> list[tuple[int, str]]:
     errors: list[str] = []
 
     try:
-        text = _extract_pdf_text_with_pypdf(path)
-        if text:
-            return text
+        pages = _extract_pdf_pages_with_pypdf(path)
+        if pages:
+            return pages
     except (PdfReadError, OSError, ValueError) as exc:
         errors.append(f"pypdf: {exc}")
 
     try:
-        text = _extract_pdf_text_with_pdfplumber(path)
-        if text:
-            return text
+        pages = _extract_pdf_pages_with_pdfplumber(path)
+        if pages:
+            return pages
     except Exception as exc:  
         errors.append(f"pdfplumber: {exc}")
 
@@ -95,33 +99,33 @@ def extract_pdf_text(path: Path) -> str:
     raise ValueError("No readable text was extracted from the PDF file.")
 
 
-def _extract_pdf_text_with_pypdf(path: Path) -> str:
+def _extract_pdf_pages_with_pypdf(path: Path) -> list[tuple[int, str]]:
     reader = PdfReader(str(path))
-    pages: list[str] = []
+    pages: list[tuple[int, str]] = []
 
     for page_number, page in enumerate(reader.pages, start=1):
         page_text = normalize_text(page.extract_text() or "")
         if page_text:
-            pages.append(f"[Page {page_number}]\n{page_text}")
+            pages.append((page_number, page_text))
 
     if not pages:
         raise ValueError("pypdf could not extract readable text.")
 
-    return "\n\n".join(pages)
+    return pages
 
 
-def _extract_pdf_text_with_pdfplumber(path: Path) -> str:
-    pages: list[str] = []
+def _extract_pdf_pages_with_pdfplumber(path: Path) -> list[tuple[int, str]]:
+    pages: list[tuple[int, str]] = []
     with pdfplumber.open(path) as pdf:
         for page_number, page in enumerate(pdf.pages, start=1):
             page_text = normalize_text(page.extract_text() or "")
             if page_text:
-                pages.append(f"[Page {page_number}]\n{page_text}")
+                pages.append((page_number, page_text))
 
     if not pages:
         raise ValueError("pdfplumber could not extract readable text.")
 
-    return "\n\n".join(pages)
+    return pages
 
 
 def extract_docx_text(path: Path) -> str:
