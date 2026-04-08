@@ -34,9 +34,30 @@ class RAGPipeline:
             timeout_seconds=settings.ollama_timeout_seconds,
             temperature=settings.ollama_temperature,
         )
-        self.splitter = RecursiveCharacterTextSplitter(
-            chunk_size=settings.chunk_size,
-            chunk_overlap=settings.chunk_overlap,
+
+    @staticmethod
+    def _validate_chunking_params(chunk_size: int, chunk_overlap: int) -> tuple[int, int]:
+        if chunk_size <= 0:
+            raise ValueError("chunk_size must be greater than 0.")
+        if chunk_overlap < 0:
+            raise ValueError("chunk_overlap must be greater than or equal to 0.")
+        if chunk_overlap >= chunk_size:
+            raise ValueError("chunk_overlap must be smaller than chunk_size.")
+        return chunk_size, chunk_overlap
+
+    def _resolve_chunking_params(
+        self,
+        chunk_size: int | None,
+        chunk_overlap: int | None,
+    ) -> tuple[int, int]:
+        resolved_chunk_size = self.settings.chunk_size if chunk_size is None else int(chunk_size)
+        resolved_chunk_overlap = self.settings.chunk_overlap if chunk_overlap is None else int(chunk_overlap)
+        return self._validate_chunking_params(resolved_chunk_size, resolved_chunk_overlap)
+
+    def _create_splitter(self, chunk_size: int, chunk_overlap: int) -> RecursiveCharacterTextSplitter:
+        return RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
             separators=["\n## ", "\n\n", "\n", ". ", " ", ""],
         )
 
@@ -59,18 +80,27 @@ class RAGPipeline:
         document: LoadedDocument,
         question: str,
         conversation_history: list[dict[str, str]] | None = None,
+        chunk_size: int | None = None,
+        chunk_overlap: int | None = None,
     ) -> RetrievalResult:
-        chunks = self._split_text(document.text)
+        chunks = self._split_text(document.text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         embeddings = self.embedder.encode(chunks, normalize_embeddings=True)
         index = self._build_index(embeddings)
-        top_chunks = self._retrieve_chunks(index, embeddings, chunks, question)
+        top_chunks = self._retrieve_chunks(index, chunks, question)
         prompt = self._build_prompt(document, top_chunks, question, conversation_history)
         answer = self.ollama.generate(prompt)
         self._persist_index(document, embeddings, chunks)
         return RetrievalResult(answer=answer, contexts=top_chunks, chunk_count=len(chunks))
 
-    def _split_text(self, text: str) -> list[str]:
-        chunks = [chunk.strip() for chunk in self.splitter.split_text(text) if chunk.strip()]
+    def _split_text(
+        self,
+        text: str,
+        chunk_size: int | None = None,
+        chunk_overlap: int | None = None,
+    ) -> list[str]:
+        resolved_chunk_size, resolved_chunk_overlap = self._resolve_chunking_params(chunk_size, chunk_overlap)
+        splitter = self._create_splitter(resolved_chunk_size, resolved_chunk_overlap)
+        chunks = [chunk.strip() for chunk in splitter.split_text(text) if chunk.strip()]
         if not chunks:
             raise ValueError("No content was available after splitting the document.")
         return chunks
@@ -84,7 +114,6 @@ class RAGPipeline:
     def _retrieve_chunks(
         self,
         index: faiss.IndexFlatIP,
-        embeddings: np.ndarray,
         chunks: list[str],
         question: str,
     ) -> list[str]:
