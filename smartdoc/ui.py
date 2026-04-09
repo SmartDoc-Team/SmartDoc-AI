@@ -181,32 +181,43 @@ def main() -> None:
             st.warning("Please enter a question.")
             return
             
-        # Thêm câu hỏi vào lịch sử
-        st.session_state.messages.append(_create_message("user", question.strip()))
+        # 1. Lấy lịch sử CŨ (trước khi thêm câu hỏi mới) để làm ngữ cảnh
+        # Chúng ta lọc bỏ ID để khớp với định dạng RAGPipeline cần
+        current_history = [
+            {"role": m["role"], "content": m["content"]} 
+            for m in st.session_state.messages
+        ]
         
-        # Nếu có file thì mới xử lý RAG thật, nếu không chỉ test UI trả lời giả lập
+        # 2. Thêm câu hỏi hiện tại vào giao diện
+        user_msg = _create_message("user", question.strip())
+        st.session_state.messages.append(user_msg)
+        
         if uploaded_file:
             target_path = settings.data_dir / uploaded_file.name
             target_path.write_bytes(uploaded_file.getbuffer())
             try:
                 document = load_document(target_path)
-                with st.spinner("Thinking..."):
+                with st.spinner("Thinkking..."):
                     pipeline = get_pipeline()
+                    
+                    # 3. Gọi RAG với standalone_question logic (đã sửa ở rag.py)
+                    # Truyền current_history (lịch sử hội thoại cũ) vào
                     result = pipeline.answer_question(
-                        document,
-                        question.strip(),
-                        st.session_state.messages,
+                        document=document,
+                        question=question.strip(),
+                        conversation_history=current_history, # <-- Truyền lịch sử cũ ở đây
                     )
+                    
+                    # 4. Lưu câu trả lời của AI vào lịch sử
                     st.session_state.messages.append(_create_message("assistant", result.answer))
             except Exception as exc:
                 st.exception(exc)
         else:
-            # Phản hồi giả lập nếu không có file (để test UI nhanh)
+            # Phản hồi giả lập nếu không có file
             st.session_state.messages.append(_create_message(
                 "assistant",
-                "Bạn chưa upload tài liệu, nhưng tôi vẫn nhận được câu hỏi của bạn. Hãy upload file để tôi phân tích chính xác hơn nhé!",
+                "Bạn chưa upload tài liệu. Hãy upload file để tôi có thể trả lời dựa trên nội dung đó nhé!",
             ))
-        
         st.rerun()
 
     if "scroll_to" in st.session_state:
