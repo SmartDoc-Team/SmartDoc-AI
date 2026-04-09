@@ -85,12 +85,12 @@ def main() -> None:
     )
     healthy, status_message = ollama_client.health_check()
 
-    # --- SIDEBAR (Giữ nguyên giao diện của bạn + Thêm Slider Q4) ---
+    # --- SIDEBAR  ---
     with st.sidebar:
         st.subheader("System Status")
         st.write(f"Model: `{settings.ollama_model}`")
 
-        # --- PHẦN THÊM MỚI: CHỈNH CHUNK PARAMETERS (Q4) ---
+       
         st.divider()
         st.subheader(" RAG Parameters Tuning")
         # Slider để người dùng chỉnh trực tiếp
@@ -108,7 +108,7 @@ def main() -> None:
         st.write(f"Embedding: `{settings.embedding_model_name}`")
         st.write(f"Top-k retrieval: `{settings.retrieval_k}`")
 
-        # Sidebar history panel (Giữ nguyên code của bạn)
+        # Sidebar history panel 
         st.divider()
         st.subheader("History")
         st.markdown(
@@ -163,7 +163,7 @@ def main() -> None:
         else:
             st.info("No chat history yet.")
 
-        # --- PHẦN THÊM MỚI: XÁC NHẬN XÓA (Q3) ---
+       
         st.divider()
         # Dùng popover để tạo form xác nhận thu gọn
         with st.popover("Clear History", use_container_width=True):
@@ -184,9 +184,9 @@ def main() -> None:
     # --- KHU VỰC CHÍNH ---
     uploaded_file = st.file_uploader("Upload a PDF or DOCX document", type=["pdf", "docx"])
     
-    # --- PHẦN THÊM MỚI: HIỂN THỊ BENCHMARK & KHUYẾN NGHỊ (Q4) ---
+   # --- HIỂN THỊ BENCHMARK--- 
     if uploaded_file:
-        with st.expander(" Benchmark & Cấu hình tối ưu (Q4)"):
+        with st.expander(" Benchmark & Cấu hình tối ưu "):
             col_b, col_r = st.columns(2)
             with col_b:
                 st.markdown("**Kết quả đo lường (Mô phỏng)**")
@@ -247,7 +247,7 @@ def main() -> None:
         
         st.rerun()
 
-    # JavaScript Scroll (Giữ nguyên code của bạn)
+    # JavaScript Scroll 
     if "scroll_to" in st.session_state:
         target = st.session_state.scroll_to
         st.markdown(f"""
