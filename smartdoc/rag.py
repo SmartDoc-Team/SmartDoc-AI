@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
 import faiss
 import numpy as np
+from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 
@@ -18,7 +21,8 @@ from smartdoc.ollama_client import OllamaClient
 @dataclass(slots=True)
 class RetrievalResult:
     answer: str
-    contexts: list[str]
+    chunks: list[dict[str, str | int]]
+    sources: list[str]
     chunk_count: int
 
 
@@ -111,15 +115,26 @@ class RAGPipeline:
         index.add(np.asarray(embeddings, dtype=np.float32))
         return index
 
-    def _retrieve_chunks(
+    def _retrieve_documents(
         self,
         index: faiss.IndexFlatIP,
         chunks: list[str],
         question: str,
-    ) -> list[str]:
+    ) -> list[Document]:
         question_embedding = self.embedder.encode([question], normalize_embeddings=True)
-        _, indices = index.search(np.asarray(question_embedding, dtype=np.float32), self.settings.retrieval_k)
-        return [chunks[idx] for idx in indices[0] if 0 <= idx < len(chunks)]
+        search_k = min(self.settings.retrieval_k, 4)
+        _, indices = index.search(np.asarray(question_embedding, dtype=np.float32), search_k)
+        return [documents[idx] for idx in indices[0] if 0 <= idx < len(documents)]
+
+    def _extract_sources(self, documents: list[Document]) -> list[str]:
+        sources: list[str] = []
+        for document in documents:
+            source = document.metadata.get("source", "unknown")
+            page = document.metadata.get("page", 1)
+            entry = f"{source} - page {page}"
+            if entry not in sources:
+                sources.append(entry)
+        return sources
 
     def _format_history(self, conversation_history: list[dict[str, str]]) -> str:
         history = [msg for msg in conversation_history if msg.get("content")]
@@ -135,11 +150,12 @@ class RAGPipeline:
     def _build_prompt(
         self,
         document: LoadedDocument,
-        contexts: list[str],
+        contexts: list[Document],
         question: str,
         conversation_history: list[dict[str, str]] | None = None,
     ) -> str:
-        joined_context = "\n\n---\n\n".join(contexts)
+        context_blocks: list[str] = [doc.page_content for doc in contexts]
+        joined_context = "\n\n---\n\n".join(context_blocks)
         clipped_context = joined_context[: self.settings.max_context_chars]
         history_block = ""
         if conversation_history:
@@ -150,7 +166,8 @@ class RAGPipeline:
             "Answer in Vietnamese unless the user asks otherwise.\n"
             "Use only the provided context. The chunks are already sorted by relevance, so prioritize earlier chunks first.\n"
             "If the answer exists in the context, state it directly and quote the section terms faithfully.\n"
-            "If the answer is missing, say clearly that the document does not contain it.\n\n"
+            "If the answer is missing, say clearly that the document does not contain it.\n"
+            "Do NOT include sources or citations in your answer. They will be displayed separately.\n\n"
             f"Document: {document.source_name} ({document.source_type})\n\n"
             f"Context:\n{clipped_context}\n\n"
         )
@@ -161,8 +178,20 @@ class RAGPipeline:
         prompt += f"Question: {question}\n\nAnswer:"
         return prompt
 
-    def _persist_index(self, document: LoadedDocument, embeddings: np.ndarray, chunks: list[str]) -> None:
+    def _persist_index(self, document: LoadedDocument, documents: list[Document], embeddings: np.ndarray) -> None:
         digest = hashlib.md5(document.source_name.encode("utf-8"), usedforsecurity=False).hexdigest()
         base_path = Path(self.settings.vector_store_dir) / digest
-        faiss.write_index(self._build_index(embeddings), str(base_path.with_suffix(".faiss")))
-        base_path.with_suffix(".txt").write_text("\n\n-----\n\n".join(chunks), encoding="utf-8")
+        index = self._build_index(embeddings)
+        faiss.write_index(index, str(base_path.with_suffix(".faiss")))
+
+        metadata = [
+            {
+                "source": doc.metadata.get("source"),
+                "page": doc.metadata.get("page"),
+                "position": doc.metadata.get("position"),
+                "text": doc.page_content,
+            }
+            for doc in documents
+        ]
+        base_path.with_suffix(".metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
+        base_path.with_suffix(".txt").write_text("\n\n-----\n\n".join([doc.page_content for doc in documents]), encoding="utf-8")

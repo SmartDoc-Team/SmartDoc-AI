@@ -27,8 +27,22 @@ def _normalize_messages() -> None:
             message["id"] = f"msg_{index}"
 
 
-def _create_message(role: str, content: str) -> dict[str, str]:
-    return {"id": f"msg_{len(st.session_state.messages)}", "role": role, "content": content}
+def _create_message(
+    role: str,
+    content: str,
+    sources: list[str] | None = None,
+    chunks: list[dict[str, str | int]] | None = None,
+) -> dict[str, object]:
+    message: dict[str, object] = {
+        "id": f"msg_{len(st.session_state.messages)}",
+        "role": role,
+        "content": content,
+    }
+    if sources is not None:
+        message["sources"] = sources
+    if chunks is not None:
+        message["chunks"] = chunks
+    return message
 
 
 def _build_history_pairs() -> list[dict[str, str]]:
@@ -171,6 +185,18 @@ def main() -> None:
         st.markdown(f'<div id="{message["id"]}"></div>', unsafe_allow_html=True)
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
+            if message.get("sources"):
+                sources = message["sources"]
+                st.markdown("### 📌 Sources")
+                for i, source_item in enumerate(sources, 1):
+                    st.markdown(f"[{i}] {source_item}")
+            if message.get("chunks"):
+                with st.expander("🔍 View retrieved context"):
+                    for chunk in message["chunks"]:
+                        source_label = chunk.get("source", "unknown")
+                        page_label = chunk.get("page", "?")
+                        st.markdown(f"📄 {source_label} - page {page_label}")
+                        st.code(chunk.get("text", "")[:500])
 
     # Ô nhập liệu của bạn
     question = st.text_area("Ask a question about the uploaded document", height=120)
@@ -188,6 +214,11 @@ def main() -> None:
         if uploaded_file:
             target_path = settings.data_dir / uploaded_file.name
             target_path.write_bytes(uploaded_file.getbuffer())
+
+            response_text = ""
+            response_sources: list[str] | None = None
+            response_chunks: list[dict[str, str | int]] | None = None
+
             try:
                 document = load_document(target_path)
                 with st.spinner("Thinking..."):
@@ -197,16 +228,32 @@ def main() -> None:
                         question.strip(),
                         st.session_state.messages,
                     )
-                    st.session_state.messages.append(_create_message("assistant", result.answer))
+                    st.write(result)
+
+                response_text = str(result.answer or "")
+                if not response_text:
+                    response_text = "Xin lỗi, tôi không nhận được câu trả lời từ mô hình."
+                response_sources = result.sources
+                response_chunks = result.chunks
             except Exception as exc:
+                response_text = f"Đã xảy ra lỗi khi xử lý tài liệu: {exc}"
                 st.exception(exc)
+            finally:
+                st.session_state.messages.append(
+                    _create_message(
+                        "assistant",
+                        response_text,
+                        sources=response_sources,
+                        chunks=response_chunks,
+                    )
+                )
         else:
             # Phản hồi giả lập nếu không có file (để test UI nhanh)
             st.session_state.messages.append(_create_message(
                 "assistant",
                 "Bạn chưa upload tài liệu, nhưng tôi vẫn nhận được câu hỏi của bạn. Hãy upload file để tôi phân tích chính xác hơn nhé!",
             ))
-        
+
         st.rerun()
 
     if "scroll_to" in st.session_state:
