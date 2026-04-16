@@ -16,6 +16,13 @@ if hf_token:
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _env_bool(name: str, default: bool = False) -> bool:
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default
+    return raw_value.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
 def _load_env_file(env_path: Path) -> None:
     if not env_path.exists():
         return
@@ -48,6 +55,8 @@ class Settings:
     chunk_overlap: int = int(os.getenv("CHUNK_OVERLAP", "200"))
     retrieval_k: int = int(os.getenv("RETRIEVAL_K", "3"))
     max_context_chars: int = int(os.getenv("MAX_CONTEXT_CHARS", "10000"))
+    rewrite_followup_enabled: bool = _env_bool("REWRITE_FOLLOWUP_ENABLED", False)
+    rewrite_followup_max_tokens: int = int(os.getenv("REWRITE_FOLLOWUP_MAX_TOKENS", "12"))
 
     def ensure_directories(self) -> None:
         for directory in (self.data_dir, self.log_dir, self.vector_store_dir):
