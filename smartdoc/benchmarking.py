@@ -8,6 +8,8 @@ from pathlib import Path
 
 import faiss
 import numpy as np
+from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from smartdoc.config import Settings
 from smartdoc.document_loaders import load_document
@@ -146,6 +148,24 @@ def build_index(embeddings: np.ndarray) -> faiss.IndexFlatIP:
     return index
 
 
+def _document_to_text(document_text: str | None, document_pages: list[tuple[int, str]] | None) -> str:
+    if document_text:
+        return document_text
+    if document_pages:
+        return "\n\n".join(text for _, text in document_pages if text)
+    return ""
+
+
+def _split_for_benchmark(document_text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        separators=["\n## ", "\n\n", "\n", ". ", " ", ""],
+    )
+    docs = splitter.split_documents([Document(page_content=document_text, metadata={"source": "benchmark", "page": 1})])
+    return [doc.page_content for doc in docs if doc.page_content]
+
+
 def evaluate_configuration(
     pipeline: RAGPipeline,
     document_text: str,
@@ -157,7 +177,9 @@ def evaluate_configuration(
 ) -> BenchmarkResult:
     started_at = time.perf_counter()
 
-    chunks = pipeline._split_text(document_text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    chunks = _split_for_benchmark(document_text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    if not chunks:
+        raise ValueError("No chunks generated for the benchmark configuration.")
     embeddings = pipeline.embedder.encode(chunks, normalize_embeddings=True)
     index = build_index(embeddings)
 
@@ -278,7 +300,10 @@ def run_chunk_benchmark(
 ) -> BenchmarkRun:
     document = load_document(document_path)
     pipeline = RAGPipeline(settings)
-    queries = build_benchmark_queries(document.text, sample_queries, seed)
+    full_text = _document_to_text(document.text, document.pages)
+    if not full_text.strip():
+        raise ValueError("Could not build benchmark corpus from the selected document.")
+    queries = build_benchmark_queries(full_text, sample_queries, seed)
 
     results: list[BenchmarkResult] = []
     for chunk_size in chunk_sizes:
@@ -287,7 +312,7 @@ def run_chunk_benchmark(
                 continue
             result = evaluate_configuration(
                 pipeline=pipeline,
-                document_text=document.text,
+                document_text=full_text,
                 queries=queries,
                 chunk_size=chunk_size,
                 chunk_overlap=chunk_overlap,
