@@ -1,5 +1,6 @@
 streamlit
 langchain
+langchain-core
 langchain-community
 langchain-text-splitters
 faiss-cpu
@@ -10,4 +11,14 @@ python-docx
 docx2txt
 numpy
 pandas
-torch --index-url https://download.pytorch.org/whl/cpu
+python-dotenv
+huggingface_hub
+pdf2image
+PyMuPDF
+pypdfium2
+Pillow
+rank_bm25
+pytesseract
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
