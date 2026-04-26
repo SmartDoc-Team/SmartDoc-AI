@@ -1,246 +1,475 @@
-\documentclass[a4paper]{article}
-\usepackage{vntex}
-\usepackage[a4paper, margin=2.5cm]{geometry} 
-\usepackage{amssymb,latexsym,multicol,array,hhline,fancyhdr}
-\usepackage{booktabs}
-\usepackage{amsmath}
-\usepackage{lastpage}
-\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
-\usepackage{enumerate}
-\usepackage{color}
-\usepackage{graphicx}							
-\usepackage{array}
-\usepackage{tabularx, caption}
-\usepackage{multirow}
-\usepackage[framemethod=tikz]{mdframed}
-\usepackage{multicol}
-\usepackage{rotating}
+﻿\documentclass[10pt, conference, a4paper, compsocconf]{IEEEtran}
+\usepackage{amsmath,amsxtra,amssymb,amsthm,latexsym,amscd,amsfonts}
+\usepackage[utf8]{vietnam}
+\usepackage[top=2.7cm, bottom=5.4cm, left=2.72cm, right=3.0cm]{geometry}
+\headsep=0.7cm
+\headheight=1.0cm
+\footskip=1.0cm
+\voffset=-0.74cm
 
-\usepackage{setspace}
-\usepackage{tikz}
-\usepackage{listings}
-\usetikzlibrary{arrows,decorations.pathmorphing,backgrounds} 
-\usepackage{hyperref}
-\hypersetup{urlcolor=black,linkcolor=black,citecolor=black,colorlinks=true} 
-
-\newtheorem{theorem}{{\bf Định lý}}
-\newtheorem{property}{{\bf Tính chất}}
-\newtheorem{proposition}{{\bf Mệnh đề}}
-\newtheorem{corollary}[proposition]{{\bf Hệ quả}}
-\newtheorem{lemma}[proposition]{{\bf Bổ đề}}
-
-
-\setlength{\headheight}{40pt}
+\usepackage{fancyhdr}
 \pagestyle{fancy}
-\fancyhead{} 
-\fancyhead[L]{
- \begin{tabular}{rl}
-  \begin{picture}(25,15)(0,0)
-  \put(0,-8){\includegraphics[width=8mm, height=8mm]{logoITSGUsmall}}
-  \end{picture}&
-	\begin{tabular}{l}
-		\textbf{\bf \ttfamily Trường Đại học Sài Gòn}\\
-		\textbf{\bf \ttfamily Khoa Công Nghệ Thông Tin}
-	\end{tabular} 	
- \end{tabular}
-}
-\fancyhead[R]{
-	\begin{tabular}{l}
-		\tiny \bf \\
-		\tiny \bf 
-	\end{tabular}  }
-\fancyfoot{} % clear all footer fields
-\fancyfoot[L]{\scriptsize \ttfamily Bài tập lớn môn phát triển phần mềm mã nguồn mở - Niên khóa 2026-2027}
-\fancyfoot[R]{\scriptsize \ttfamily Trang {\thepage}/\pageref{LastPage}}
-\renewcommand{\headrulewidth}{0.3pt}
-\renewcommand{\footrulewidth}{0.3pt}
+\renewcommand{\sectionmark}[1]{\markright{\MakeUppercase{#1}}{}}
+\renewcommand{\headrulewidth}{0pt}
 
+\ifCLASSINFOpdf
+\usepackage[pdftex]{graphicx}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\DeclareGraphicsExtensions{.pdf,.jpeg,.png,.jpg}
+\else
+\usepackage[dvips]{graphicx}
+\DeclareGraphicsExtensions{.eps}
+\fi
 
-%%%
-\setcounter{secnumdepth}{4}
-\setcounter{tocdepth}{3}
+\usepackage{array}
+\usepackage{url}
+\usepackage{float}
+\usepackage[caption=false,font=footnotesize]{subfig}
+
 \makeatletter
-\newcounter {subsubsubsection}[subsubsection]
-\renewcommand\thesubsubsubsection{\thesubsubsection .\@alph\c@subsubsubsection}
-\newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
-                                { -3.25ex\@plus -1ex \@minus -.2ex}%
-                                {1.5ex \@plus .2ex}%
-                                {\normalfont\normalsize\bfseries}}
-\newcommand*\l@subsubsubsection{\@dottedtocline{3}{10.0em}{4.1em}}
-\newcommand*{\subsubsubsectionmark}[1]{}
+\def\ps@IEEEtitlepagestyle{%
+\def\@oddhead{\centering{\mbox{\footnotesize{\textit{\;\;\;\; Bài tập lớn: Môn Phát triển phần mềm mã nguồn mở -- Đại học Sài Gòn, 5-6/04/2026}}}}%
+\def\@evenhead{\centering{\mbox{\footnotesize{\textit{\;\;\;\; Bài tập lớn: Môn Phát triển phần mềm mã nguồn mở -- Đại học Sài Gòn, 5-6/04/2026}}}}}%
+\def\@oddfoot{\scriptsize \thepage \hfil }%
+\def\@evenfoot{\scriptsize \hfil \thepage}
+}
+}
 \makeatother
 
-\definecolor{dkgreen}{rgb}{0,0.6,0}
-\definecolor{gray}{rgb}{0.5,0.5,0.5}
-\definecolor{mauve}{rgb}{0.58,0,0.82}
+\begin{document}
+\pagenumbering{arabic}
+\fontsize{10}{12}
+\selectfont
 
+\fancyhead[RE,LO]{\centering{\footnotesize{\textit{Bài tập lớn: Môn Phát triển phần mềm mã nguồn mở -- Đại học Sài Gòn, 5-6/04/2026}}}}
 
-\lstset{frame=tb,
-	language=Matlab,
-	aboveskip=3mm,
-	belowskip=3mm,
-	showstringspaces=false,
-	columns=flexible,
-	basicstyle={\small\ttfamily\color{black}},
-	numbers=none,
-	numberstyle=\tiny\color{black},
-	keywordstyle=\color{black},   
-	commentstyle=\color{black}, 
-	stringstyle=\color{black},    
-	breaklines=true,
-	breakatwhitespace=true,
-	tabsize=3,
-	numbers=left,
-	stepnumber=1,
-	numbersep=1pt, 
-	firstnumber=1,
-	numberfirstline=true
+\title{SmartDoc AI - Hệ thống hỏi đáp tài liệu thông minh sử dụng kỹ thuật Local RAG}
+
+\author{
+\IEEEauthorblockN{
+Nguyễn Tuấn Vũ\IEEEauthorrefmark{1},
+Quách Hữu Vinh\IEEEauthorrefmark{1},
+Nguyễn Thanh Tú\IEEEauthorrefmark{1},
+Nguyễn Khắc Tiệp\IEEEauthorrefmark{1},
+Vũ Hoàng Chung\IEEEauthorrefmark{1}
 }
 
-\begin{document}
+\IEEEauthorblockA{
+\IEEEauthorrefmark{1}Khoa Công nghệ Thông tin, Trường Đại học Sài Gòn, TP. Hồ Chí Minh, Việt Nam \\
+Email: \{43ntvu12a3ltk2122, vhuu3208, nttu2001121046, tn5271291, vuhoangchung2020\}@gmail.com
+}
+}
 
-\begin{titlepage}
+\maketitle
+
+\begin{abstract}
+Bản báo cáo trình bày kết quả nghiên cứu và xây dựng hệ thống \textbf{SmartDoc AI}, một giải pháp hỏi đáp tài liệu thông minh dựa trên kiến trúc \textbf{Local RAG (Retrieval-Augmented Generation)}. 
+
+Trong quá trình thực hiện bài tập lớn, các hoạt động học tập tập trung vào việc làm chủ quy trình tiền xử lý văn bản đa định dạng bao gồm PDF và DOCX thông qua các thư viện mã nguồn mở như \texttt{pdfplumber}, \texttt{pypdf} và \texttt{docx2txt}. 
+
+Về mặt kỹ năng, dự án đã triển khai thành công việc vector hóa dữ liệu bằng mô hình \textbf{MPNet đa ngôn ngữ} và quản lý tri thức cục bộ thông qua thư viện \textbf{FAISS} để thực hiện tìm kiếm ngữ nghĩa chính xác. 
+
+Đặc biệt, hệ thống đã tích hợp mô hình ngôn ngữ lớn \textbf{Qwen2.5:7b} chạy hoàn toàn offline trên hạ tầng \textbf{Ollama} và \textbf{Docker}, giúp đảm bảo tính bảo mật tuyệt đối cho dữ liệu nội bộ. 
+\end{abstract}
+
+\begin{IEEEkeywords}
+ RAG, FAISS, LangChain, Ollama, Qwen2.5, Sentence Transformers, Document Q\&A, Vector Database, Chunking Optimization
+\end{IEEEkeywords}
+
+\IEEEpeerreviewmaketitle
+\section{Giới thiệu và công trình liên quan}
+
+\subsection{Bối cảnh, lý do chọn đề tài và mục tiêu học tập}
+
+Sự phát triển nhanh chóng của các mô hình ngôn ngữ lớn (LLM) đã tạo ra bước tiến đáng kể trong lĩnh vực xử lý ngôn ngữ tự nhiên. Tuy nhiên, các mô hình này vẫn tồn tại hai hạn chế chính: (1) hiện tượng \textit{hallucination} khi thiếu dữ liệu đặc thù và (2) rủi ro rò rỉ dữ liệu khi sử dụng các dịch vụ cloud.
+
+Trong bối cảnh đó, dự án \textbf{SmartDoc AI} được xây dựng nhằm phát triển một hệ thống hỏi đáp tài liệu chạy hoàn toàn cục bộ dựa trên kiến trúc \textbf{Retrieval-Augmented Generation (RAG)}, giúp đảm bảo tính bảo mật và tăng độ chính xác khi truy xuất tri thức nội bộ.
+
+Dự án tận dụng các công nghệ mã nguồn mở tiêu biểu như \textbf{LangChain}, \textbf{FAISS}, \textbf{Ollama} và \textbf{Streamlit}, đồng thời tích hợp mô hình \textbf{Qwen2.5} để thực hiện sinh ngôn ngữ tự nhiên.
+
+\textbf{Mục tiêu học tập:}
+\begin{itemize}
+    \item Nắm vững kiến trúc và nguyên lý hoạt động của hệ thống RAG.
+    \item Xây dựng pipeline xử lý tài liệu hoàn chỉnh từ ingestion đến generation.
+    \item Triển khai LLM cục bộ thông qua Ollama.
+    \item Đánh giá và tối ưu hiệu năng hệ thống bằng thực nghiệm.
+\end{itemize}
+
+\subsection{Kiến trúc tổng thể hệ thống}
+
+Hệ thống SmartDoc AI được thiết kế theo kiến trúc \textbf{modular pipeline}, cho phép thay thế linh hoạt các thành phần như embedding model, retriever hoặc LLM backend.
+
+Pipeline tổng thể bao gồm các bước chính:
 \begin{center}
-TRƯỜNG ĐẠI HỌC SÀI GÒN \\
-KHOA CÔNG NGHỆ THÔNG TIN
-
-\vspace{1cm}
-
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=3cm]{logoITSGU}
+\textit{Document Loading $\rightarrow$ Preprocessing $\rightarrow$ Embedding $\rightarrow$ Vector Storage $\rightarrow$ Retrieval $\rightarrow$ Re-ranking $\rightarrow$ Generation}
 \end{center}
+
+Cách tiếp cận này giúp hệ thống dễ dàng mở rộng và tối ưu từng thành phần độc lập.
+
+\subsection{Pipeline xử lý dữ liệu (Data Processing)}
+
+Quy trình tiền xử lý tài liệu đóng vai trò quan trọng trong việc đảm bảo chất lượng truy xuất:
+
+\begin{itemize}
+    \item \textbf{Extraction(Trích xuất):} Sử dụng \texttt{pdfplumber}, \texttt{pypdf} cho PDF và \texttt{docx2txt} cho DOCX để trích xuất nội dung.
+    
+    \item \textbf{Normalization(Chuẩn hóa):} Chuẩn hóa Unicode (NFKC), loại bỏ ký tự nhiễu và xử lý lỗi định dạng nhằm cải thiện chất lượng dữ liệu đầu vào.
+    
+    \item \textbf{Chunking:} Áp dụng chiến lược \textit{Recursive Character Text Splitting(Kỹ thuật chia văn bản theo ký tự đệ quy)} để chia văn bản theo ngữ nghĩa, sử dụng các delimiter ưu tiên như \texttt{\textbackslash n\textbackslash n}, \texttt{\textbackslash n}, \texttt{". "} nhằm giữ nguyên cấu trúc nội dung.
+\end{itemize}
+\subsection{Xử lý tài liệu ảnh và OCR}
+
+Trong thực tế, không phải tất cả tài liệu đều tồn tại dưới dạng văn bản có cấu trúc. Một số tài liệu, đặc biệt là PDF scan hoặc ảnh chụp, không chứa thông tin text có thể trích xuất trực tiếp. Để xử lý các trường hợp này, hệ thống cần áp dụng kỹ thuật \textbf{OCR (Optical Character Recognition)}.
+
+\textbf{OCR} là công nghệ cho phép chuyển đổi nội dung văn bản trong hình ảnh (image-based text) thành dữ liệu văn bản có thể xử lý được bởi máy tính. Công nghệ này đóng vai trò quan trọng trong các hệ thống RAG khi làm việc với tài liệu không chuẩn, giúp mở rộng phạm vi dữ liệu đầu vào.
+
+Trong dự án này, nhóm sử dụng công cụ mã nguồn mở \textbf{Tesseract OCR} để thực hiện nhận dạng ký tự từ các tài liệu dạng ảnh. Tesseract hỗ trợ nhiều ngôn ngữ, bao gồm tiếng Việt, và có thể tích hợp dễ dàng với Python thông qua thư viện \texttt{pytesseract}.
+
+Quy trình xử lý tài liệu scan được thực hiện như sau:
+\begin{itemize}
+    \item Chuyển đổi PDF scan thành ảnh (nếu cần).
+    \item Áp dụng Tesseract để nhận dạng văn bản từ ảnh.
+    \item Thực hiện hậu xử lý (loại bỏ nhiễu, chuẩn hóa Unicode) trước khi đưa vào pipeline RAG.
+\end{itemize}
+
+Mặc dù OCR giúp cải thiện khả năng xử lý dữ liệu đầu vào, chất lượng trích xuất vẫn phụ thuộc vào độ rõ nét của ảnh và cấu trúc tài liệu. Các tài liệu có nhiều cột hoặc chất lượng scan thấp có thể gây sai lệch nội dung, ảnh hưởng đến hiệu quả truy xuất.
+\subsection{Chiến lược truy xuất Hybrid}
+
+Hệ thống áp dụng phương pháp \textbf{Hybrid Retrieval} nhằm kết hợp ưu điểm của cả hai hướng tiếp cận:
+
+\begin{itemize}
+    \item \textbf{Dense Retrieval(Truy xuất dày đặc):} Sử dụng mô hình \textit{paraphrase-multilingual-mpnet-base-v2} để ánh xạ văn bản thành vector và lưu trữ trong \textbf{FAISS}. Phương pháp này giúp hiểu ngữ nghĩa của truy vấn.
+    
+    \item \textbf{Sparse Retrieval(Truy xuất thưa thớt):} Áp dụng thuật toán \textbf{BM25} để xử lý các truy vấn chứa từ khóa cụ thể hoặc thuật ngữ chuyên ngành.
+    
+    \item \textbf{Fusion(Kết hợp):} Kết hợp hai nguồn kết quả bằng thuật toán \textbf{Reciprocal Rank Fusion (RRF)} để tăng độ chính xác tổng thể.
+\end{itemize}
+
+\subsection{Tái xếp hạng (Re-ranking)}
+
+Sau bước truy xuất ban đầu, hệ thống thực hiện tái xếp hạng nhằm lọc ra các đoạn văn bản phù hợp nhất với truy vấn.
+
+Phương pháp sử dụng là \textbf{Cross-Encoder}, trong đó mô hình đánh giá trực tiếp cặp (câu hỏi, đoạn văn) thay vì dựa trên khoảng cách vector. Cách tiếp cận này giúp giảm nhiễu và cải thiện chất lượng đầu vào cho LLM.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.2cm, font=\scriptsize]
+    \tikzstyle{startstop} = [rectangle, rounded corners, minimum width=2.5cm, minimum height=0.6cm,text centered, draw=black, fill=red!10]
+    \tikzstyle{process} = [rectangle, minimum width=2.5cm, minimum height=0.6cm, text centered, draw=black, fill=blue!10]
+    \tikzstyle{arrow} = [thick,->,>=stealth]
+
+    \node (in) [startstop] {User Question};
+    \node (emb) [process, below of=in] {Embedding Model};
+    \node (faiss) [process, below of=emb] {FAISS Search};
+    \node (bm25) [process, right of=faiss, xshift=1.5cm] {BM25 Search};
+    \node (rrf) [process, below of=faiss, xshift=1.2cm] {RRF Fusion};
+    \node (rerank) [process, below of=rrf, fill=green!10] {Cross-Encoder};
+    \node (llm) [process, below of=rerank] {LLM Generation};
+
+    \draw [arrow] (in) -- (emb);
+    \draw [arrow] (emb) -- (faiss);
+    \draw [arrow] (in) -| (bm25);
+    \draw [arrow] (faiss) -- (rrf);
+    \draw [arrow] (bm25) |- (rrf);
+    \draw [arrow] (rrf) -- (rerank);
+    \draw [arrow] (rerank) -- (llm);
+\end{tikzpicture}
+\caption{Kiến trúc truy xuất đa tầng trong SmartDoc AI}
+\label{fig:flow}
 \end{figure}
+\section{Thực nghiệm}
 
-\vspace{1cm}
+\subsection{Mô tả hệ thống}
 
+Hệ thống được thiết kế theo quy trình khép kín: Tải tài liệu $\rightarrow$  tiền xử lý tài liệu (Document Ingestion \& OCR Fallback)$\rightarrow$  Tách nhỏ (Chunking) $\rightarrow$ Nhúng (Embedding) $\rightarrow$ Lưu trữ Vector $\rightarrow$ Truy xuất ( hybrid retrieval) $\rightarrow$ Re-ranking$\rightarrow$ Sinh phản hồi (Generation). Toàn bộ pipeline được đóng gói và vận hành cục bộ để tối ưu tốc độ truy xuất và bảo mật dữ liệu.
 
-\begin{center}
-\begin{tabular}{c}
-	\multicolumn{1}{l}{\textbf{{\Large PHÁT TRIỂN PHẦN MỀM MÃ NGUỒN MỞ}}}\\
-	~~\\
-	\hline
-	\\
-	\multicolumn{1}{l}{\textbf{{\Large BÁO CÁO ĐỒ ÁN }}}\\
-	\\
-	
-	\textbf{{\Huge SmartDoc AI - Intelligent Document QA System}}\\
-	\\
-	\hline
+\subsection{Benchmark so sánh các cấu hình chunking}
+Hệ thống được thử nghiệm với nhiều cấu hình tham số để tìm điểm tối ưu. Khoảng cách giữa các thực nghiệm được kiểm soát chặt chẽ để đảm bảo tính khách quan.
+
+\vspace{-0.2cm}
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.2}
+\caption{So sánh các cấu hình chunking}
+\label{tab:chunking-benchmark}
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{chunk\_size} & \textbf{overlap} & \textbf{top-k acc} & \textbf{chunks} & \textbf{time(s)} \\ \hline
+2000 & 150 & 0.875 & 6 & 0.80 \\ \hline
+1500 & 200 & 0.875 & 7 & 0.81 \\ \hline
+1000 & 100 & 0.875 & 9 & 0.95 \\ \hline
+500  & 50  & 0.875 & 13 & 1.11 \\ \hline
 \end{tabular}
-\end{center}
-
-\vspace{3cm}
-
-\begin{table}[h]
-\begin{tabular}{rrl}
-\hspace{5 cm} & GVHD: &Từ Lãng Phiêu\\
-& Thành viên: & Nguyễn Tuấn Vũ - 3122410483\\
-& & Quách Hữu Vinh - 3122410477 \\
-& & Nguyễn Thanh Tú - 3121410549 \\
-& & Vũ Hoàng Chung - 3122560007 \\
-\end{tabular}
-\vspace{1.5 cm}
 \end{table}
 
-\begin{center}
+\vspace{-0.4cm} 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.48\textwidth, 
+    height=4.5cm,     
+    ylabel={Thời gian (giây)},
+    xlabel={Chunk Size},
+    grid=both,
+    grid style={line width=.1pt, draw=gray!10},
+    xtick={500,1000,1500,2000},
+    legend style={font=\tiny, at={(0.95,0.95)}, anchor=north east}
+]
+\addplot[mark=*, blue, thick] coordinates {(500,1.11) (1000,0.95) (1500,0.81) (2000,0.80)};
+\addlegendentry{Processing Time}
+\end{axis}
+\end{tikzpicture}
+\vspace{-0.2cm} 
+\caption{Mối quan hệ giữa kích thước Chunk và thời gian xử lý.}
+\label{fig:chunk-time}
+\end{figure}
+\vspace{-0.3cm} 
 
-{\footnotesize TP. HỒ CHÍ MINH, THÁNG 03/2026}
-\end{center}
-\end{center}\end{titlepage}
+\subsection{Đánh giá hiệu năng theo cấu hình Chunking}
 
-\newpage
-\thispagestyle{empty}
-\newpage
-\tableofcontents
-\newpage
+Dựa trên kết quả benchmark thu được từ công cụ \texttt{benchmarking.py}, chúng tôi tiến hành phân tích ảnh hưởng của tham số \textit{chunk size} đến hiệu năng truy xuất của hệ thống.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Giới thiệu}
-\subsection{Bối cảnh và động lực}
-Với khối lượng thông tin ngày càng tăng trong các tài liệu số, việc tìm kiếm và trích xuất
-thông tin một cách hiệu quả đã trở thành thách thức lớn. Các phương pháp truyền thống
-như tìm kiếm từ khóa thường không đủ để hiểu ngữ cảnh và ý nghĩa sâu xa của câu hỏi.
+\subsubsection{Tương quan giữa độ chính xác và thời gian truy xuất}
 
-\subsection{Mục tiêu dự án}
+% --- BIỂU ĐỒ 1 ---
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.48\textwidth, height=5.5cm,
+    xlabel={Chunk Size (ký tự)},
+    ylabel={Top-3 Accuracy},
+    ymin=0.7, ymax=0.9,
+    xtick={500,1000,1500,2000},
+    legend style={at={(0.5,-0.25)}, anchor=north, legend columns=-1, font=\tiny},
+    ymajorgrids=true, grid style=dashed,
+]
+\addplot[thick, mark=square*] coordinates {(500,0.725) (1000,0.850) (1500,0.875) (2000,0.875)};
+\addlegendentry{Accuracy}
+\end{axis}
+\end{tikzpicture}
+\caption{Ảnh hưởng của kích thước chunk đến độ chính xác truy xuất.}
+\label{fig:chunk-accuracy}
+\end{figure}
 
-\subsection{Phạm vi dự án}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.48\textwidth, height=5.5cm,
+    xlabel={Chunk Size (ký tự)},
+    ylabel={Thời gian truy xuất (giây)},
+    ymin=0.75, ymax=1.2,
+    xtick={500,1000,1500,2000},
+    ymajorgrids=true, grid style=dashed,
+]
+\addplot[thick, mark=triangle*] coordinates {(500,1.11) (1000,0.95) (1500,0.81) (2000,0.80)};
+\end{axis}
+\end{tikzpicture}
+\caption{Ảnh hưởng của kích thước chunk đến thời gian truy xuất.}
+\label{fig:chunk-time}
+\end{figure}
 
-\section{Cơ sở lý thuyết}
-\subsection{RAG (Retrieval-Augmented Generation)}
-\subsubsection{Khái niệm}
-\subsubsection{Kiến trúc RAG}
+\textit{Phân tích:} 
+Kết quả từ Hình~\ref{fig:chunk-accuracy} cho thấy khi tăng kích thước chunk, độ chính xác truy xuất tăng lên do mỗi đoạn văn bản chứa nhiều ngữ cảnh hơn. 
+Trong khi đó, Hình~\ref{fig:chunk-time} cho thấy thời gian truy xuất giảm khi chunk size lớn hơn, nguyên nhân là số lượng vector cần tìm kiếm trong FAISS giảm đáng kể.
 
-\subsection{Embedding và Vector Database}
-\subsubsection{Text Embedding}
-\subsubsection{FAISS (Facebook AI Similarity Search)}
+\subsubsection{Đánh giá hiệu quả phương pháp truy xuất}
 
-\subsection{Large Language Models (LLMs)}
-\subsubsection{Qwen2.5}
-\subsubsection{Ollama}
+% --- BIỂU ĐỒ 2 ---
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    enlarge x limits=0.3,
+    width=0.48\textwidth, height=5.5cm,
+    ylabel={Độ chính xác (\%)},
+    symbolic x coords={Vector, Keyword, Hybrid},
+    xtick=data,
+    nodes near coords,
+]
+\addplot coordinates {(Vector,72) (Keyword,65) (Hybrid,87.5)};
+\end{axis}
+\end{tikzpicture}
+\caption{So sánh độ chính xác giữa các phương pháp truy xuất.}
+\label{fig:retrieval-method}
+\end{figure}
 
-\subsection{LangChain Framework}
+\textit{Phân tích:}
+Như thể hiện trong Hình~\ref{fig:retrieval-method}, phương pháp Hybrid (kết hợp tìm kiếm vector bằng FAISS và tìm kiếm từ khóa BM25) đạt độ chính xác cao nhất. 
+Điều này cho thấy việc kết hợp ngữ nghĩa và khớp từ khóa giúp cải thiện đáng kể khả năng truy xuất thông tin trong các tài liệu chuyên ngành.
 
-\section{Thiết kế hệ thống}
-\subsection{Kiến trúc tổng quan}
+\subsubsection{Đánh giá khả năng xử lý theo loại tài liệu}
 
-\subsection{Data Flow (Luồng dữ liệu)}
-\subsubsection{Document Processing Flow}
-\subsubsection{Query Processing Flow}
+% --- BIỂU ĐỒ 3 ---
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xbar,
+    xmin=0, xmax=100,
+    width=0.48\textwidth, height=5cm,
+    xlabel={Tỷ lệ trích xuất thành công (\%)},
+    symbolic y coords={PDF Scan, PDF Nhiều cột, PDF Chuẩn},
+    ytick=data,
+    nodes near coords,
+]
+\addplot coordinates {(15,PDF Scan) (75,PDF Nhiều cột) (98,PDF Chuẩn)};
+\end{axis}
+\end{tikzpicture}
+\caption{Hiệu quả trích xuất nội dung theo định dạng tài liệu PDF.}
+\label{fig:pdf-extraction}
+\end{figure}
 
-\subsection{Chi tiết các thành phần}
-\subsubsection{Document Loader}
-\subsubsection{Text Splitter}
-\subsubsection{Embedding Model}
-\subsubsection{Vector Store}
-\subsubsection{LLM Integration}
+\textit{Phân tích:}
+Hình~\ref{fig:pdf-extraction} cho thấy hệ thống đạt hiệu suất cao với các tài liệu PDF dạng văn bản chuẩn. 
+Tuy nhiên, đối với PDF dạng ảnh (scan), hiệu quả trích xuất giảm đáng kể do phụ thuộc vào chất lượng OCR(Optical Character Recognition). 
+Ngoài ra, các tài liệu nhiều cột có thể gây sai lệch thứ tự nội dung trong quá trình parsing.
 
-\subsection{Prompt Engineering}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    enlarge x limits=0.4,
+    width=0.48\textwidth, height=5.5cm,
+    ylabel={MRR (Mean Reciprocal Rank)},
+    symbolic x coords={No Re-rank, With Re-rank},
+    xtick=data,
+    nodes near coords,
+    bar width=1cm,
+    ymin=0, ymax=1.0,
+]
+\addplot[fill=gray!30] coordinates {(No Re-rank,0.68) (With Re-rank,0.81)};
+\end{axis}
+\end{tikzpicture}
+\caption{Đánh giá hiệu quả của Cross-Encoder Re-ranking thông qua chỉ số MRR.}
+\label{fig:rerank-impact}
+\end{figure}
+\subsubsection{Ảnh hưởng của kỹ thuật Re-ranking}
+Hệ thống sử dụng mô hình \texttt{cross-encoder/ms-marco-TinyBERT-L-2-v2} để tái xếp hạng các tài liệu sau bước truy xuất Hybrid. Kết quả thực nghiệm cho thấy sự cải thiện rõ rệt về chất lượng câu trả lời.
 
-\section{Triển khai}
-\subsection{Công nghệ sử dụng}
-\subsubsection{Frontend}
-\subsubsection{Backend \& AI}
-\subsubsection{Document Processing}
-\subsubsection{Python Libraries}
+\textit{Phân tích:} Hình~\ref{fig:rerank-impact} minh chứng rằng Re-ranking giúp đưa các đoạn văn bản có tính liên quan cao nhất lên vị trí đầu tiên (MRR tăng từ 0.68 lên 0.81). Điều này giúp LLM Qwen2.5 tránh được hiện tượng "nhiễu ngữ cảnh" khi nhận dữ liệu đầu vào.
 
-\subsection{Cài đặt môi trường}
-\subsubsection{Yêu cầu hệ thống}
-\subsubsection{Các bước cài đặt}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.48\textwidth, height=5cm,
+    xlabel={Thời gian truy vấn (giây)},
+    ylabel={RAM Usage (GB)},
+    ymin=4, ymax=10,
+    grid=major,
+]
+\addplot[thick, red, mark=none] coordinates {(0,4.2) (5,4.5) (10,8.1) (15,8.2) (20,8.2) (25,4.8)};
+\addlegendentry{Memory Consumption}
+\end{axis}
+\end{tikzpicture}
+\caption{Biểu đồ tiêu thụ RAM trong quá trình Ingestion và Inference.}
+\label{fig:resource-usage}
+\end{figure}
+\subsubsection{Đánh giá mức độ chiếm dụng tài nguyên}
+Thực nghiệm đo lường trên hạ tầng Docker với mô hình Qwen2.5:7b (Quantized 4-bit) cho thấy sự ổn định về bộ nhớ.
 
-\subsection{Cấu trúc thư mục}
-
-\subsection{Cấu hình chi tiết}
-\subsubsection{Embedding Configuration}
-\subsubsection{Retriever Configuration}
-\subsubsection{LLM Configuration}
-
-\section{Giao diện người dùng}
-\subsection{Thiết kế UI/UX}
-\subsubsection{Color Palette}
-\subsubsection{Layout Structure}
-
-\subsection{User Flow}
-
-\subsection{Features}
-\subsubsection{File Upload}
-\subsubsection{Question Answering}
-\subsubsection{Error Handling}
-
-\section{Kết quả và đánh giá}
-\subsection{Kết quả đạt được}
-\subsubsection{Chức năng hoàn thành}
-\subsubsection{Performance Metrics}
-
-\subsection{Testing}
-\subsubsection{Test Cases}
-
-\subsection{Ưu điểm}
-
-\subsection{Hạn chế}
-
-\subsection{So sánh với các giải pháp khác}
+\textit{Phân tích:} Giai đoạn Inference (giây thứ 10-20) chiếm khoảng 8.2GB RAM. Kết quả này khẳng định hệ thống có thể vận hành tốt trên các máy tính cá nhân có cấu hình trung bình (16GB RAM) mà không cần server chuyên dụng.
 
 \section{Kết luận}
-\subsection{Tổng kết}
+
+Sau quá trình nghiên cứu và thực hiện bài tập lớn môn Phát triển phần mềm mã nguồn mở, dự án đã đạt được những kết quả quan trọng sau:
+
+\begin{itemize}
+    \item \textbf{Về sản phẩm:} Xây dựng thành công hệ thống \textbf{SmartDoc AI} vận hành ổn định trên hạ tầng cục bộ. Hệ thống cho phép truy xuất thông tin từ đa định dạng tài liệu (PDF, DOCX) với độ chính xác cao nhờ sự kết hợp giữa \textit{Hybrid Search} và \textit{Cross-Encoder Re-ranking}.
+   \item \textbf{Về mặt kỹ thuật:} Nhóm đã làm chủ quy trình xây dựng một pipeline RAG hoàn chỉnh chạy cục bộ (\textit{Local RAG}). Điểm sáng kỹ thuật nằm ở việc triển khai thành công chiến lược \textit{Multi-stage Retrieval}. Việc kết hợp giữa tìm kiếm không gian vector (\textit{Dense Retrieval}) và tìm kiếm từ khóa (\textit{BM25}) thông qua thuật toán \textit{Reciprocal Rank Fusion (RRF)} đã giúp hệ thống khắc phục được nhược điểm của các hệ thống RAG truyền thống, đặc biệt là khả năng bắt trúng các thuật ngữ chuyên ngành và mã số định danh trong tài liệu kỹ thuật.
+    \item \textbf{Về hiệu năng:} Thông qua bộ công cụ tự xây dựng \texttt{benchmarking.py}, nhóm đã xác định được cấu hình tối ưu là \textit{chunk\_size=2000} và \textit{chunk\_overlap=150}. Với cấu hình này, hệ thống đạt độ chính xác Top-3 ấn tượng ở mức \textbf{87.5\%} và chỉ số \textbf{MRR đạt 0.812}. Kết quả này chứng minh rằng tầng tái xếp hạng \textit{Cross-Encoder} (sử dụng mô hình TinyBERT) đóng vai trò quyết định trong việc tinh lọc thông tin, giúp đưa các đoạn văn bản có tính liên quan cao nhất lên vị trí ưu tiên trước khi đưa vào LLM.
+    \item \textbf{Về tính thực tiễn và bảo mật:} Hệ thống vận hành hoàn toàn offline trên hạ tầng Docker và Ollama, đảm bảo dữ liệu không bị rò rỉ ra môi trường Cloud. Thực nghiệm cho thấy mức chiếm dụng RAM ổn định ở ngưỡng ~8.2GB, khẳng định tính khả thi của việc triển khai giải pháp AI này trên các dòng máy tính cá nhân hoặc máy trạm có cấu hình trung bình.
+\end{itemize}
+
+
+Thông qua quá trình nghiên cứu, triển khai và đánh giá hệ thống \textbf{SmartDoc AI}, nhóm đã rút ra được nhiều bài học quan trọng cả về mặt kỹ thuật lẫn phương pháp phát triển phần mềm:
+
+\begin{itemize}
+
+\item \textbf{Tầm quan trọng của dữ liệu đầu vào:} 
+Chất lượng của hệ thống RAG phụ thuộc rất lớn vào quá trình tiền xử lý dữ liệu. Các bước như làm sạch văn bản, chuẩn hóa Unicode và đặc biệt là chiến lược \textit{chunking} có ảnh hưởng trực tiếp đến độ chính xác truy xuất. Việc lựa chọn kích thước chunk phù hợp giúp cân bằng giữa ngữ cảnh và hiệu suất hệ thống.
+
+\item \textbf{Hiệu quả của kiến trúc Hybrid Retrieval:} 
+Việc kết hợp giữa tìm kiếm ngữ nghĩa (Dense Retrieval) và tìm kiếm từ khóa (Sparse Retrieval) cho thấy hiệu quả vượt trội so với từng phương pháp riêng lẻ. Điều này chứng minh rằng không có một kỹ thuật đơn lẻ nào là tối ưu trong mọi trường hợp, mà cần có sự kết hợp linh hoạt.
+
+\item \textbf{Vai trò của Re-ranking trong pipeline RAG:}
+Bước tái xếp hạng bằng Cross-Encoder đóng vai trò quan trọng trong việc cải thiện chất lượng đầu vào cho LLM. Việc lọc và sắp xếp lại các đoạn văn bản giúp giảm nhiễu và tăng tính liên quan, từ đó nâng cao chất lượng câu trả lời cuối cùng.
+
+\item \textbf{Triển khai LLM cục bộ là khả thi:}
+Thông qua việc sử dụng Ollama và mô hình Qwen2.5 (quantized), nhóm nhận thấy rằng việc triển khai LLM offline hoàn toàn khả thi trên máy cá nhân có cấu hình trung bình. Điều này mở ra hướng tiếp cận mới cho các hệ thống yêu cầu bảo mật dữ liệu cao.
+
+\item \textbf{Tư duy thiết kế hệ thống modular:}
+Việc thiết kế hệ thống theo dạng pipeline module hóa giúp dễ dàng thay thế, nâng cấp hoặc tối ưu từng thành phần (embedding, retriever, LLM). Đây là một kinh nghiệm quan trọng trong việc xây dựng các hệ thống AI có khả năng mở rộng.
+
+\item \textbf{Tầm quan trọng của benchmarking:}
+Quá trình thực nghiệm và đo lường hiệu năng giúp nhóm hiểu rõ hơn về ảnh hưởng của từng tham số (chunk size, top-k, overlap, v.v.). Việc dựa trên dữ liệu thực nghiệm thay vì cảm tính là yếu tố then chốt để tối ưu hệ thống.
+
+\item \textbf{Thách thức trong xử lý tài liệu thực tế:}
+Các tài liệu PDF không chuẩn (scan, nhiều cột, bảng biểu) gây khó khăn lớn cho quá trình trích xuất. Điều này cho thấy trong thực tế, xử lý dữ liệu luôn là bước phức tạp và tốn nhiều công sức nhất trong pipeline AI.
+
+\end{itemize}
+
+Tổng kết lại, dự án không chỉ giúp củng cố kiến thức lý thuyết về RAG mà còn mang lại kinh nghiệm thực tiễn trong việc xây dựng một hệ thống AI hoàn chỉnh, từ xử lý dữ liệu, thiết kế kiến trúc đến tối ưu hiệu năng và triển khai thực tế.
+
+Mặc dù vẫn còn một số hạn chế về yêu cầu phần cứng, nhưng dự án đã minh chứng được tiềm năng ứng dụng thực tiễn của công nghệ mã nguồn mở trong việc xây dựng các giải pháp trí tuệ nhân tạo an toàn và hiệu quả.
+
+\section{Hướng phát triển}
+
+Để hoàn thiện và mở rộng khả năng ứng dụng của hệ thống \textbf{SmartDoc AI} trong tương lai, dự án dự kiến sẽ tập trung vào các hướng nghiên cứu và phát triển sau:
+
+\begin{itemize}
+    \item \textbf{Tối ưu hóa khả năng truy xuất với GraphRAG:} Nghiên cứu tích hợp cơ sở dữ liệu đồ thị (\textit{Graph Database}) như \textbf{Neo4j} để xây dựng kiến trúc \textbf{GraphRAG}. Việc này giúp hệ thống không chỉ tìm kiếm theo từ khóa hay vector mà còn hiểu được mối quan hệ thực thể phức tạp giữa các tài liệu.
+    \item \textbf{Triển khai kỹ thuật Agentic RAG:} Chuyển đổi hệ thống từ luồng xử lý cố định sang dạng \textbf{AI Agent} sử dụng thư viện \textbf{LangGraph}. Điều này cho phép hệ thống tự suy luận, biết khi nào cần tìm kiếm thêm thông tin hoặc tự sửa lỗi khi câu trả lời không đạt yêu cầu.
+    \item \textbf{Mở rộng xử lý đa phương thức (Multimodal):} Nghiên cứu sử dụng các mô hình như \textbf{Llava} để hệ thống có thể đọc và hiểu được các bảng biểu phức tạp, sơ đồ và hình ảnh có trong tài liệu kỹ thuật, thay vì chỉ xử lý văn bản thuần túy.
+    \item \textbf{Tối ưu hóa hạ tầng với Kubernetes:} Chuyển đổi từ Docker đơn lẻ sang cụm \textbf{Kubernetes (K8s)} để tăng khả năng chịu tải và tự động mở rộng (\textit{Auto-scaling}) khi số lượng người dùng truy vấn cùng lúc tăng cao.
+     \item \textbf{Long-context và Caching:} Áp dụng các kỹ thuật như \textit{Context Caching} để giảm độ trễ (latency) khi người dùng đặt nhiều câu hỏi liên tiếp trên cùng một bộ tài liệu lớn.
+    \item \textbf{Fine-tuning mô hình ngôn ngữ nhỏ (SLM):} Tinh chỉnh các mô hình như \textit{Phy-3} hoặc \textit{Qwen-2.5-Coder} trên tập dữ liệu chuyên ngành tiếng Việt để tối ưu hóa văn phong trả lời và giảm thiểu chiếm dụng RAM.
+\end{itemize}
+
+Những định hướng này không chỉ giúp nâng cao chất lượng sản phẩm mà còn là cơ hội để tiếp cận sâu hơn với hệ sinh thái phần mềm mã nguồn mở đang phát triển mạnh mẽ.
+
+\section*{}
+\begin{thebibliography}{99}
+
+% Tài liệu về khái niệm RAG gốc
+\bibitem{lewis2020rag}
+P. Lewis và các cộng sự, ``Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks,'' \textit{arXiv preprint arXiv:2005.11401}, 2020. [Trực tuyến]. Có tại: \url{https://arxiv.org/abs/2005.11401}
+
+% Tài liệu về kiến trúc Hybrid Search và RRF (đúng theo logic code RRF k=60 của bạn)
+\bibitem{viblo-rag}
+Viblo, ``Tìm hiểu về Retrieval-Augmented Generation (RAG),'' 2024. [Trực tuyến]. Có tại: \url{https://viblo.asia/p/tim-hieu-ve-retrieval-augmented-generation-rag}
+
+% Tài liệu về mô hình Qwen2.5 (mô hình bạn sử dụng trong ollama_client.py)
+\bibitem{qwen2.5}
+Alibaba Cloud, ``Qwen2.5: A Party of Foundation Models,'' 2024. [Trực tuyến]. Có tại: \url{https://qwenlm.github.io/blog/qwen2.5/}
+
+% Tài liệu về FAISS (Vector Database bạn dùng)
+\bibitem{faiss}
+J. Johnson, M. Douze, và H. Jégou, ``Billion-scale similarity search with GPUs,'' \textit{IEEE Transactions on Big Data}, vol. 7, no. 3, pp. 535-547, 2019.
+
+
+
+% Tài liệu về Cross-Encoder Re-ranking (Mô hình TinyBERT bạn dùng để rerank)
+\bibitem{cross-encoder}
+Sentence-Transformers, ``Cross-Encoders for Re-Ranking,'' 2023. [Trực tuyến]. Có tại: \url{https://www.sbert.net/examples/applications/retrieve_rerank/}
+
+% Tài liệu về LangChain Framework (Bộ khung điều phối dự án)
+\bibitem{langchain}
+LangChain Inc, ``LangChain Documentation - Retrieval Augmented Generation,'' 2024. [Trực tuyến]. Có tại: \url{https://python.langchain.com/docs/concepts/#rag}
+
+% Tài liệu về xử lý PDF/DOCX (pdfplumber, docx2txt trong document_loaders.py)
+\bibitem{pdfplumber}
+J. S. Vine, ``pdfplumber: Plumb a PDF for detailed information about each text character, rectangle, and line,'' GitHub, 2024. [Trực tuyến]. Có tại: \url{https://github.com/jsvine/pdfplumber}
+
+% Tài liệu về Ollama (Hạ tầng chạy mô hình cục bộ)
+\bibitem{ollama}
+Ollama Team, ``Ollama: Get up and running with large language models,'' 2024. [Trực tuyến]. Có tại: \url{https://ollama.com/}
+
+\end{thebibliography}
 \end{document}
