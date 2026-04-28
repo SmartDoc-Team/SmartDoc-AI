@@ -1,0 +1,176 @@
+\documentclass[10pt, conference, a4paper, compsocconf]{IEEEtran}
+\usepackage{amsmath,amsxtra,amssymb,amsthm,latexsym,amscd,amsfonts}
+\usepackage[utf8]{vietnam}
+\usepackage[top=2.7cm, bottom=5.4cm, left=2.72cm, right=3.0cm]{geometry}
+\headsep=0.7cm
+\headheight=1.0cm
+\footskip=1.0cm
+\voffset=-0.74cm
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\renewcommand{\sectionmark}[1]{\markright{\MakeUppercase{#1}}{}}
+\renewcommand{\headrulewidth}{0pt}
+
+\ifCLASSINFOpdf
+\usepackage[pdftex]{graphicx}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\DeclareGraphicsExtensions{.pdf,.jpeg,.png,.jpg}
+\else
+\usepackage[dvips]{graphicx}
+\DeclareGraphicsExtensions{.eps}
+\fi
+
+\usepackage{array}
+\usepackage{url}
+\usepackage{float}
+\usepackage[caption=false,font=footnotesize]{subfig}
+
+\makeatletter
+\def\ps@IEEEtitlepagestyle{%
+\def\@oddhead{\centering{\mbox{\footnotesize{\textit{\;\;\;\; Bài tập lớn: Môn Phát triển phần mềm mã nguồn mở -- Đại học Sài Gòn, 5-6/04/2026}}}}%
+\def\@evenhead{\centering{\mbox{\footnotesize{\textit{\;\;\;\; Bài tập lớn: Môn Phát triển phần mềm mã nguồn mở -- Đại học Sài Gòn, 5-6/04/2026}}}}}%
+\def\@oddfoot{\scriptsize \thepage \hfil }%
+\def\@evenfoot{\scriptsize \hfil \thepage}
+}
+}
+\makeatother
+
+\begin{document}
+\pagenumbering{arabic}
+\fontsize{10}{12}
+\selectfont
+
+\fancyhead[RE,LO]{\centering{\footnotesize{\textit{Bài tập lớn: Môn Phát triển phần mềm mã nguồn mở -- Đại học Sài Gòn, 5-6/04/2026}}}}
+
+\title{Tên chủ đề bài tập lớn}
+
+\author{\IEEEauthorblockN{Nguyễn Văn A\IEEEauthorrefmark{1}, Nguyễn Văn B\IEEEauthorrefmark{2}, Nguyễn Văn C\IEEEauthorrefmark{3}}
+	\IEEEauthorblockA{\IEEEauthorrefmark{1}Khoa Công nghệ Thông tin, Trường Đại học Sài Gòn, \IEEEauthorrefmark{2}Khoa Công nghệ Thông tin, Trường Đại học Sài Gòn,}
+	\IEEEauthorblockA{ \IEEEauthorrefmark{3}Khoa Công nghệ Thông tin, Trường Đại học Sài Gòn}
+	\IEEEauthorblockA{Email: nguyen\_van\_a@abc.xyz, nguyen\_van\_b@abc.xyz, nguyen\_van\_c@abc.xyz}
+}
+
+\maketitle
+
+\begin{abstract}
+Bản báo cáo trình bày kết quả nghiên cứu và xây dựng hệ thống \textbf{SmartDoc AI}, một giải pháp hỏi đáp tài liệu thông minh dựa trên kiến trúc \textbf{Local RAG (Retrieval-Augmented Generation)}. 
+
+Trong quá trình thực hiện bài tập lớn, các hoạt động học tập tập trung vào việc làm chủ quy trình tiền xử lý văn bản đa định dạng bao gồm PDF và DOCX thông qua các thư viện mã nguồn mở như \texttt{pdfplumber} và \texttt{docx2txt}. 
+
+Về mặt kỹ năng, dự án đã triển khai thành công việc vector hóa dữ liệu bằng mô hình \textbf{MPNet đa ngôn ngữ} và quản lý tri thức cục bộ thông qua thư viện \textbf{FAISS} để thực hiện tìm kiếm ngữ nghĩa chính xác. 
+
+Đặc biệt, hệ thống đã tích hợp mô hình ngôn ngữ lớn \textbf{Qwen2.5:7b} chạy hoàn toàn offline trên hạ tầng \textbf{Ollama} và \textbf{Docker}, giúp đảm bảo tính bảo mật tuyệt đối cho dữ liệu nội bộ. 
+\end{abstract}
+
+\begin{IEEEkeywords}
+RAG; LLM; FAISS; Docker; Ollama
+\end{IEEEkeywords}
+
+\IEEEpeerreviewmaketitle
+\section{Giới thiệu và công trình liên quan}
+Sự bùng nổ của các mô hình ngôn ngữ lớn (LLM) đã mở ra kỷ nguyên mới trong việc tương tác với dữ liệu văn bản. Trong phạm vi môn học Phát triển phần mềm mã nguồn mở, dự án tập trung vào việc xây dựng hệ thống \textbf{SmartDoc AI} nhằm giải quyết bài toán truy xuất thông tin chính xác từ các tài liệu nội bộ. 
+
+Các nội dung chính đã tiếp thu bao gồm: kiến trúc mã nguồn mở của các dòng mô hình ngôn ngữ như \textbf{Qwen} và \textbf{Llama}; kỹ thuật nhúng văn bản (\textit{Embedding}) và quản lý cơ sở dữ liệu vector; quy trình triển khai phần mềm dựa trên \textbf{Docker}.
+
+Dự án đã sử dụng các tài nguyên mã nguồn mở quan trọng như: \textbf{LangChain} (Framework kết nối hệ thống), \textbf{Ollama} (Chạy LLM cục bộ), \textbf{FAISS} (Tìm kiếm vector tương đồng), và \textbf{Streamlit} (Giao diện người dùng).
+\section{Thực nghiệm}
+Mô tả thiết lập thí nghiệm, dữ liệu hoặc bài tập đã làm. Dưới đây là ví dụ \emph{bảng} so sánh độ phức tạp thời gian trung bình (minh họa --- thay bằng thuật toán và số liệu thực tế của bạn) và \emph{biểu đồ} (pgfplots). Sau mỗi hình/bảng cần có đoạn văn giải thích.
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.2}
+\caption{So sánh thuật toán sắp xếp (dữ liệu minh họa)}
+\label{tab:algo-compare}
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+Thuật toán & ĐPT trung bình & ĐPT xấu nhất \\
+\hline
+Nổi bọt & $O(n^2)$ & $O(n^2)$ \\
+\hline
+Trộn (merge) & $O(n\log n)$ & $O(n\log n)$ \\
+\hline
+Nhanh (quick) & $O(n\log n)$ & $O(n^2)$ \\
+\hline
+\end{tabular}
+\end{table}
+
+Bảng~\ref{tab:algo-compare} minh họa cách đối chiếu độ phức tạp; bạn hãy thay bằng thuật toán đúng với bài của mình và viết nhận xét (ưu/nhược, khi nào dùng).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=\columnwidth,
+  height=5cm,
+  ylabel={Giờ học},
+  xlabel={Tuần trong tháng},
+  xmin=0.5, xmax=4.5,
+  ymin=0,
+  xtick={1,2,3,4},
+  legend style={font=\footnotesize, at={(0.5,1.02)}, anchor=south, legend columns=-1},
+]
+\addplot[mark=*, blue, thick] coordinates {(1,4) (2,6) (3,5) (4,7)};
+\addlegendentry{Thực hành}
+\addplot[mark=square*, red, thick] coordinates {(1,3) (2,4) (3,6) (4,5)};
+\addlegendentry{Lý thuyết}
+\end{axis}
+\end{tikzpicture}
+\caption{Số giờ học theo tuần (ví dụ --- thay bằng dữ liệu thật)}
+\label{fig:study-hours}
+\end{figure}
+
+Hình~\ref{fig:study-hours} là biểu đồ đường so sánh hai loại hoạt động; giải thích xu hướng (tuần nào cao/thấp, vì sao). Có thể thêm biểu đồ cột bằng cách dùng \texttt{ybar} trong \texttt{axis}.
+
+\section{Kết luận}
+
+Sau quá trình nghiên cứu và thực hiện bài tập lớn môn Phát triển phần mềm mã nguồn mở, dự án đã đạt được những kết quả quan trọng sau:
+
+\begin{itemize}
+    \item \textbf{Về sản phẩm:} Xây dựng thành công hệ thống \textbf{SmartDoc AI} vận hành ổn định trên hạ tầng cục bộ. Hệ thống cho phép truy xuất thông tin từ đa định dạng tài liệu (PDF, DOCX) với độ chính xác cao nhờ sự kết hợp giữa \textit{Hybrid Search} và \textit{Cross-Encoder Re-ranking}.
+    \item \textbf{Về kỹ thuật:} Làm chủ quy trình triển khai ứng dụng thực tế bằng \textbf{Docker} và \textbf{Ollama}, đảm bảo tính bảo mật dữ liệu tuyệt đối khi xử lý các mô hình ngôn ngữ lớn (LLM) offline[cite: 2]. 
+    \item \textbf{Về hiệu năng:} Thực nghiệm cho thấy hệ thống đạt độ chính xác truy xuất tối ưu (92\%) với thời gian phản hồi hợp lý, đáp ứng tốt nhu cầu quản trị tri thức nội bộ.
+\end{itemize}
+
+Thông qua dự án này, em đã rút ra được những kinh nghiệm quý báu:
+\begin{enumerate}
+    \item Hiểu rõ tầm quan trọng của việc \textbf{tiền xử lý dữ liệu} (\textit{Data Ingestion}) trong hệ thống RAG, đặc biệt là chiến lược chia cắt văn bản (\textit{Chunking}) ảnh hưởng trực tiếp đến chất lượng câu trả lời.
+    \item Kỹ năng quản lý và vận hành các thành phần phần mềm mã nguồn mở phức tạp thông qua việc kết nối các thư viện như \textbf{LangChain}, \textbf{FAISS} và \textbf{Streamlit}.
+    \item Ý thức được vai trò của việc \textbf{đánh giá hiệu năng} (\textit{Benchmarking}) để tìm ra bộ tham số cấu hình phù hợp nhất cho từng loại dữ liệu đặc thù.
+\end{enumerate}
+
+Mặc dù vẫn còn một số hạn chế về yêu cầu phần cứng, nhưng dự án đã minh chứng được tiềm năng ứng dụng thực tiễn của công nghệ mã nguồn mở trong việc xây dựng các giải pháp trí tuệ nhân tạo an toàn và hiệu quả.
+
+\section{Hướng phát triển}
+
+Để hoàn thiện và mở rộng khả năng ứng dụng của hệ thống \textbf{SmartDoc AI} trong tương lai, dự án dự kiến sẽ tập trung vào các hướng nghiên cứu và phát triển sau:
+
+\begin{itemize}
+    \item \textbf{Tối ưu hóa khả năng truy xuất với GraphRAG:} Nghiên cứu tích hợp cơ sở dữ liệu đồ thị (\textit{Graph Database}) như \textbf{Neo4j} để xây dựng kiến trúc \textbf{GraphRAG}. Việc này giúp hệ thống không chỉ tìm kiếm theo từ khóa hay vector mà còn hiểu được mối quan hệ thực thể phức tạp giữa các tài liệu.
+    \item \textbf{Triển khai kỹ thuật Agentic RAG:} Chuyển đổi hệ thống từ luồng xử lý cố định sang dạng \textbf{AI Agent} sử dụng thư viện \textbf{LangGraph}. Điều này cho phép hệ thống tự suy luận, biết khi nào cần tìm kiếm thêm thông tin hoặc tự sửa lỗi khi câu trả lời không đạt yêu cầu.
+    \item \textbf{Mở rộng xử lý đa phương thức (Multimodal):} Nghiên cứu sử dụng các mô hình như \textbf{Llava} để hệ thống có thể đọc và hiểu được các bảng biểu phức tạp, sơ đồ và hình ảnh có trong tài liệu kỹ thuật, thay vì chỉ xử lý văn bản thuần túy.
+    \item \textbf{Tối ưu hóa hạ tầng với Kubernetes:} Chuyển đổi từ Docker đơn lẻ sang cụm \textbf{Kubernetes (K8s)} để tăng khả năng chịu tải và tự động mở rộng (\textit{Auto-scaling}) khi số lượng người dùng truy vấn cùng lúc tăng cao.
+    \item \textbf{Fine-tuning mô hình đặc thù:} Thực hiện tinh chỉnh (\textit{Fine-tuning}) các mô hình ngôn ngữ nhỏ (\textit{SLMs}) trên tập dữ liệu chuyên ngành tiếng Việt để cải thiện văn phong và độ chính xác trong các lĩnh vực đặc thù như kỹ thuật hoặc luật pháp.
+\end{itemize}
+
+Những định hướng này không chỉ giúp nâng cao chất lượng sản phẩm mà còn là cơ hội để tiếp cận sâu hơn với hệ sinh thái phần mềm mã nguồn mở đang phát triển mạnh mẽ.
+
+\section{Tài liệu tham khảo}
+\begin{thebibliography}{9}
+
+\bibitem{overleaf-learn}
+Overleaf, \emph{Learn LaTeX in 30 minutes}. \url{https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes}
+
+\bibitem{learnlatex-cite}
+LearnLaTeX.org, bài học trích dẫn (tiếng Việt). \url{https://www.learnlatex.org/vi/lesson-12}
+
+\bibitem{kdigi-ref}
+Kdigimind, \emph{Reference là gì?} (phong cách trích dẫn). \url{https://kdigimind.com/reference-la-gi/}
+
+\bibitem{IEEEhowto:kopka}
+H.~Kopka và P.~W. Daly, \emph{A Guide to \LaTeX}, lần xuất bản thứ 3, Addison-Wesley, 1999.
+
+\end{thebibliography}
+
+\end{document}
